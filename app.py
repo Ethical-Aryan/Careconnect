@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 from groq import Groq
 from flask import jsonify
+from urllib.parse import urlparse
 
 load_dotenv()
 
@@ -16,13 +17,23 @@ client = Groq(
 app = Flask(__name__)
 app.secret_key = "careconnect_secret"
 
-# MySQL connection
+# ======================
+# DATABASE CONNECTION (Railway Compatible)
+# ======================
+
+db_url = os.getenv("DATABASE_URL")
+
+if not db_url:
+    raise Exception("DATABASE_URL not set")
+
+parsed = urlparse(db_url)
+
 db = mysql.connector.connect(
-    host=os.getenv("DB_HOST"),
-    user=os.getenv("DB_USER"),
-    password=os.getenv("DB_PASSWORD"),
-    database=os.getenv("DB_NAME"),
-    port=int(os.getenv("DB_PORT", 3306))
+    host=parsed.hostname,
+    user=parsed.username,
+    password=parsed.password,
+    database=parsed.path.lstrip("/"),
+    port=parsed.port
 )
 
 cursor = db.cursor()
