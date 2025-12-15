@@ -38,6 +38,24 @@ db = mysql.connector.connect(
 
 cursor = db.cursor()
 
+# 🔹 AUTO CREATE USERS TABLE (RUNS ONLY IF NOT EXISTS)
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nationality VARCHAR(50),
+    initial VARCHAR(10),
+    full_name VARCHAR(100),
+    gender VARCHAR(20),
+    date_of_birth DATE,
+    mobile VARCHAR(20),
+    email VARCHAR(100) UNIQUE,
+    password VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+""")
+
+db.commit()
+
 @app.route("/")
 def home():
     return redirect("/register")
