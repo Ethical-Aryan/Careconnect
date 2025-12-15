@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Yoga for Mental Wellness | CareConnect{% endblock %}
+
+{% block content %}
+<div class="wellness-container">
+
+    <!-- HEADER -->
+    <div class="card wellness-card">
+        <h2>🧘 10-Minute Calm Mind Yoga</h2>
+        <p class="subtitle">
+            Follow these simple poses to reduce anxiety, stress, and loneliness
+        </p>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="card">
+        <div class="progress-info">
+            <span id="yogaProgressText">Completed: 0 / 7 poses</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="yogaProgressFill"></div>
+        </div>
+    </div>
+
+    <!-- YOGA STEPS -->
+    <div class="yoga-flow">
+
+        <!-- 1 -->
+        <div class="card yoga-step">
+            <h3>1️⃣ Child’s Pose (Balasana)</h3>
+            <img src="{{ url_for('static', filename='img/yoga2.jpeg') }}" alt="Child's Pose">
+            <p>🕒 Hold for 1 minute. Breathe slowly and relax your mind.</p>
+            <button onclick="markDone(this)">✔ Done</button>
+        </div>
+
+        <!-- 2 -->
+        <div class="card yoga-step">
+            <h3>2️⃣ Corpse Pose (Shavasana)</h3>
+            <img src="{{ url_for('static', filename='img/yoga3.jpeg') }}" alt="Corpse Pose">
+            <p>🕒 Lie still for 2 minutes. Let go of all thoughts.</p>
+            <button onclick="markDone(this)">✔ Done</button>
+        </div>
+
+        <!-- 3 -->
+        <div class="card yoga-step">
+            <h3>3️⃣ Easy Pose & Meditation</h3>
+            <img src="{{ url_for('static', filename='img/yoga4.jpeg') }}" alt="Easy Pose">
+            <p>🕒 Sit calmly for 2 minutes. Focus on your breath.</p>
+            <button onclick="markDone(this)">✔ Done</button>
+        </div>
+
+        <!-- 4 -->
+        <div class="card yoga-step">
+            <h3>4️⃣ Cat-Cow Pose</h3>
+            <img src="{{ url_for('static', filename='img/yoga5.jpeg') }}" alt="Cat Cow Pose">
+            <p>🕒 Move slowly with breath for 1 minute.</p>
+            <button onclick="markDone(this)">✔ Done</button>
+        </div>
+
+        <!-- 5 -->
+        <div class="card yoga-step">
+            <h3>5️⃣ Downward-Facing Dog</h3>
+            <img src="{{ url_for('static', filename='img/yoga6.jpeg') }}" alt="Downward Dog">
+            <p>🕒 Hold for 1 minute. Feel energy flow.</p>
+            <button onclick="markDone(this)">✔ Done</button>
+        </div>
+
+        <!-- 6 -->
+        <div class="card yoga-step">
+            <h3>6️⃣ Tree Pose</h3>
+            <img src="{{ url_for('static', filename='img/yoga7.jpeg') }}" alt="Tree Pose">
+            <p>🕒 Balance for 30 seconds each side.</p>
+            <button onclick="markDone(this)">✔ Done</button>
+        </div>
+
+        <!-- 7 -->
+        <div class="card yoga-step">
+            <h3>7️⃣ Legs Up the Wall</h3>
+            <img src="{{ url_for('static', filename='img/yoga1.jpeg') }}" alt="Legs Up Wall">
+            <p>🕒 Relax here for 2 minutes.</p>
+            <button onclick="markDone(this)">✔ Done</button>
+        </div>
+
+    </div> <!-- ✅ yoga-flow closed -->
+
+    <!-- COMPLETION MESSAGE -->
+    <div class="card completion-msg" id="yogaComplete">
+        🌟 Congratulations! You completed the Calm Mind Yoga Flow.
+    </div>
+
+</div>
+
+<script>
+let completed = 0;
+const total = 7;
+
+function markDone(btn) {
+    if (btn.disabled) return;
+
+    btn.textContent = "✓ Completed";
+    btn.disabled = true;
+    btn.style.background = "#198754";
+
+    completed++;
+    const percent = (completed / total) * 100;
+
+    document.getElementById("yogaProgressText").innerText =
+        `Completed: ${completed} / ${total} poses`;
+
+    document.getElementById("yogaProgressFill").style.width =
+        percent + "%";
+
+    if (completed === total) {
+        document.getElementById("yogaComplete").style.display = "block";
+    }
+}
+
+
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Daily Wellness | CareConnect{% endblock %}
+
+{% block content %}
+<div class="wellness-container">
+
+    <!-- HERO -->
+    <div class="card wellness-hero">
+        <h2>🌿 Today’s Wellness Journey</h2>
+        <p class="subtitle">
+            Small steps. Calm mind. Better you.
+        </p>
+    </div>
+
+    <!-- DAILY TIP -->
+    <div class="card wellness-card">
+        <h3>💡 Daily Wellness Tip</h3>
+
+        <p class="wellness-tip" id="wellnessTip">
+            {{ tip }}
+        </p>
+
+        <button class="tts-btn" onclick="speakTip()">🔊 Listen</button>
+    </div>
+
+    <!-- WELLNESS GAME -->
+    <div class="card progress-card">
+        <h3>🎯 Today’s Wellness Challenge</h3>
+        <p class="subtitle">Complete all tasks to feel refreshed</p>
+
+        <!-- Progress -->
+        <div class="progress-info">
+            <span id="scoreText">Progress: 0%</span>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <!-- TASKS -->
+        <div class="task-list" id="checklist">
+            <label class="task-item">
+                <input type="checkbox" onchange="updateProgress()">
+                <span>💧 Drink enough water</span>
+            </label>
+
+            <label class="task-item">
+                <input type="checkbox" onchange="updateProgress()">
+                <span>🚶 Take a short walk or stretch</span>
+            </label>
+
+            <label class="task-item">
+                <input type="checkbox" onchange="updateProgress()">
+                <span>🥗 Eat a healthy meal</span>
+            </label>
+
+            <label class="task-item">
+                <input type="checkbox" onchange="updateProgress()">
+                <span>🌬️ Practice deep breathing</span>
+            </label>
+
+            <label class="task-item">
+                <input type="checkbox" onchange="updateProgress()">
+                <span>😴 Sleep at least 7 hours</span>
+            </label>
+        </div>
+
+        <div class="completion-msg" id="completionMsg">
+            🎉 Amazing! You completed today’s wellness journey.
+        </div>
+    </div>
+
+    <!-- DISCLAIMER -->
+    <div class="card disclaimer">
+        <p>
+            ⚠️ This wellness activity is for general guidance only
+            and does not replace professional medical advice.
+        </p>
+    </div>
+
+</div>
+
+<script>
+function speakTip() {
+    const text = document.getElementById("wellnessTip").innerText;
+    const speech = new SpeechSynthesisUtterance(text);
+    speech.lang = "en-IN";
+    window.speechSynthesis.speak(speech);
+}
+
+function updateProgress() {
+    const checkboxes = document.querySelectorAll("#checklist input[type='checkbox']");
+    const checked = [...checkboxes].filter(cb => cb.checked).length;
+    const total = checkboxes.length;
+
+    const percentage = Math.round((checked / total) * 100);
+
+    document.getElementById("scoreText").innerText =
+        `Progress: ${percentage}%`;
+
+    document.getElementById("progressFill").style.width =
+        percentage + "%";
+
+    document.getElementById("completionMsg").style.display =
+        checked === total ? "block" : "none";
+}
+</script>
+
+{% endblock %}

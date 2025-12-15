@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}CareConnect{% endblock %}</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <a href="/" class="logo">
+        <span class="logo-icon">💙</span>
+        <span>CareConnect</span>
+    </a>
+
+    <div class="nav-right">
+        <button id="themeToggle" class="theme-toggle" title="Toggle Calm Mode">
+            🌙
+        </button>
+
+        <ul class="nav-links">
+            {% if session.get("user_id") %}
+                <li><a href="/dashboard">Dashboard</a></li>
+                <li><a href="/logout" class="btn-nav">Logout</a></li>
+            {% else %}
+                <li><a href="/login">Login</a></li>
+                <li><a href="/register" class="btn-nav">Register</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main-content">
+    {% block content %}{% endblock %}
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <p>
+        ⚠️ This platform is for general health & wellness support only.
+        It does not replace professional medical advice.
+    </p>
+</footer>
+
+<!-- SPEECH TO TEXT -->
+<script>
+function startDictation(inputId) {
+    if (!window.webkitSpeechRecognition) {
+        alert("Please use Google Chrome for voice input.");
+        return;
+    }
+
+    const recognition = new webkitSpeechRecognition();
+    recognition.lang = "en-IN";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onresult = function(event) {
+        const input = document.getElementById(inputId);
+        if (input) {
+            input.value = event.results[0][0].transcript;
+        }
+    };
+
+    recognition.onerror = function(event) {
+        alert("Microphone error: " + event.error);
+    };
+
+    recognition.start();
+}
+</script>
+<script>
+function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+
+    if (input.type === "password") {
+        input.type = "text";
+        btn.textContent = "🙈";
+        btn.setAttribute("aria-label", "Hide password");
+    } else {
+        input.type = "password";
+        btn.textContent = "👁️";
+        btn.setAttribute("aria-label", "Show password");
+    }
+}
+
+</script>
+<script>
+const toggleBtn = document.getElementById("themeToggle");
+
+// Load saved mode
+if (localStorage.getItem("theme") === "night") {
+    document.body.classList.add("night-mode");
+    toggleBtn.textContent = "☀️";
+}
+
+toggleBtn.addEventListener("click", () => {
+    document.body.classList.toggle("night-mode");
+
+    if (document.body.classList.contains("night-mode")) {
+        localStorage.setItem("theme", "night");
+        toggleBtn.textContent = "☀️";
+    } else {
+        localStorage.setItem("theme", "light");
+        toggleBtn.textContent = "🌙";
+    }
+});
+</script>
+
+</body>
+</html>

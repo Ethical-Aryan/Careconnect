@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Login | CareConnect{% endblock %}
+
+{% block content %}
+<div class="form-container">
+
+    <h2>Welcome Back</h2>
+    <p class="subtitle">Sign in to access your health dashboard</p>
+
+    <form method="POST">
+
+        <!-- Email -->
+        <label>Email Address</label>
+        <div class="voice-input">
+            <input
+                type="email"
+                id="login_email"
+                name="email"
+                placeholder="you@example.com"
+                required
+                autocomplete="email"
+            >
+            <button
+                type="button"
+                class="mic-btn"
+                onclick="startDictation('login_email')"
+                aria-label="Speak email"
+                title="Speak email"
+            >🎤</button>
+        </div>
+
+        <!-- Password -->
+        <label>Password</label>
+        <div class="password-wrapper">
+            <input
+                type="password"
+                id="login_password"
+                name="password"
+                placeholder="••••••••"
+                required
+                autocomplete="current-password"
+            >
+            <button
+                type="button"
+                class="toggle-password small-eye"
+                onclick="togglePassword('login_password', this)"
+                aria-label="Show password"
+                title="Show / Hide Password"
+            >
+                👁️
+            </button>
+        </div>
+
+        <button type="submit">Login</button>
+    </form>
+
+    <!-- Voice Help -->
+    <button class="tts-btn" onclick="speakLogin()">🔊 Hear Login Instructions</button>
+
+    <div class="divider"></div>
+
+    <div class="link">
+        <span>New here?</span>
+        <a href="/register">Create an account</a>
+    </div>
+</div>
+
+<!-- TEXT TO SPEECH -->
+<script>
+function speakLogin() {
+    const text =
+        "Welcome back. Please enter your email address and password to continue. You may use the microphone button to speak your email if typing is difficult.";
+    const speech = new SpeechSynthesisUtterance(text);
+    speech.lang = "en-IN";
+    window.speechSynthesis.speak(speech);
+}
+</script>
+
+{% endblock %}

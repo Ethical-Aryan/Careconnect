@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Register | CareConnect{% endblock %}
+
+{% block content %}
+<div class="form-container">
+
+    <h2>🩺 Patient Registration</h2>
+    <p class="subtitle">Create your personal wellness account</p>
+
+    <form method="POST" autocomplete="on">
+
+        <!-- Nationality -->
+        <label>* Nationality</label>
+        <select name="nationality" required>
+            <option value="">Select nationality</option>
+            <option>Indian</option>
+            <option>Other</option>
+        </select>
+
+        <!-- Initial -->
+        <label>* Initial</label>
+        <select name="initial" required>
+            <option value="">Select</option>
+            <option>Mr.</option>
+            <option>Mrs.</option>
+            <option>Ms.</option>
+        </select>
+
+        <!-- Full Name -->
+        <label>* Full Name</label>
+        <div class="voice-input">
+            <input
+                type="text"
+                id="name"
+                name="name"
+                placeholder="Enter full name"
+                required
+            >
+            <button
+                type="button"
+                class="mic-btn"
+                onclick="startDictation('name')"
+                title="Speak your name"
+            >🎤</button>
+        </div>
+
+        <!-- Gender -->
+        <label>* Gender</label>
+        <select name="gender" required>
+            <option value="">Select</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+        </select>
+
+        <!-- DOB -->
+        <label>* Date of Birth</label>
+        <input type="date" name="dob" required>
+
+        <!-- Mobile -->
+        <label>* Mobile Number</label>
+        <div class="voice-input">
+            <input
+                type="tel"
+                id="mobile"
+                name="mobile"
+                placeholder="Enter mobile number"
+                required
+            >
+            <button
+                type="button"
+                class="mic-btn"
+                onclick="startDictation('mobile')"
+                title="Speak mobile number"
+            >🎤</button>
+        </div>
+
+        <!-- Email -->
+        <label>* Email Address</label>
+        <div class="voice-input">
+            <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="you@example.com"
+                required
+            >
+            <button
+                type="button"
+                class="mic-btn"
+                onclick="startDictation('email')"
+                title="Speak email address"
+            >🎤</button>
+        </div>
+
+        <!-- Password -->
+        <label>* Password</label>
+        <div class="password-wrapper">
+            <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="••••••••"
+                required
+                minlength="6"
+                autocomplete="new-password"
+            >
+
+            <button
+                type="button"
+                class="toggle-password small-eye"
+                onclick="togglePassword('password', this)"
+                aria-label="Show or hide password"
+                title="Show / Hide Password"
+            >👁️</button>
+        </div>
+
+        <button type="submit">Create Account</button>
+    </form>
+
+    <!-- Voice Instructions -->
+    <button class="tts-btn" onclick="speakText()">🔊 Hear Instructions</button>
+
+    <div class="divider"></div>
+
+    <div class="link">
+        <span>Already registered?</span>
+        <a href="/login">Login here</a>
+    </div>
+
+</div>
+
+<!-- TEXT TO SPEECH -->
+<script>
+function speakText() {
+    const text =
+        "Please fill in all required details. You may use the microphone buttons to speak instead of typing. Your information is used only to support your wellness journey.";
+    const speech = new SpeechSynthesisUtterance(text);
+    speech.lang = "en-IN";
+    window.speechSynthesis.speak(speech);
+}
+</script>
+
+{% endblock %}

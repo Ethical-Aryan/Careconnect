@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Wellness Chat | CareConnect{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:600px;margin:auto;">
+    <h2>💬 Wellness Chat</h2>
+
+    <p class="subtitle">
+        This assistant provides emotional support only and does not replace professional medical advice.
+    </p>
+
+    <div id="chatBox" style="height:320px;overflow-y:auto;margin:16px 0;"></div>
+
+    <input id="userInput" placeholder="Share how you feel..." />
+    <button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+function sendMessage() {
+    const input = document.getElementById("userInput");
+    const chatBox = document.getElementById("chatBox");
+
+    if (!input.value.trim()) return;
+
+    chatBox.innerHTML += `<p><b>You:</b> ${input.value}</p>`;
+
+    fetch("/chat", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({message: input.value})
+    })
+    .then(res => res.json())
+    .then(data => {
+        chatBox.innerHTML += `<p><b>CareBot:</b> ${data.reply}</p>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+    });
+
+    input.value = "";
+}
+</script>
+{% endblock %}
