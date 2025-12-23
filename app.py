@@ -1,30 +1,30 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, jsonify
 import mysql.connector
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from dotenv import load_dotenv
 from groq import Groq
-from flask import jsonify
 from urllib.parse import urlparse
+import random
 
 load_dotenv()
 
-print("Groq key loaded:", os.getenv("GROQ_API_KEY"))  # TEMP DEBUG
+# just to check if env is loading (remove later)
+print(os.getenv("GROQ_API_KEY"))
 
-client = Groq(
-    api_key=os.getenv("GROQ_API_KEY")
-)
 app = Flask(__name__)
 app.secret_key = "careconnect_secret"
 
-# ======================
-# DATABASE CONNECTION (Railway Compatible)
-# ======================
+# groq client
+client = Groq(
+    api_key=os.getenv("GROQ_API_KEY")
+)
 
+# ---------- DATABASE SETUP ----------
 db_url = os.getenv("DATABASE_URL")
 
 if not db_url:
-    raise Exception("DATABASE_URL not set")
+    raise Exception("DATABASE_URL not found")
 
 parsed = urlparse(db_url)
 
@@ -32,13 +32,13 @@ db = mysql.connector.connect(
     host=parsed.hostname,
     user=parsed.username,
     password=parsed.password,
-    database=parsed.path.lstrip("/"),
+    database=parsed.path.replace("/", ""),
     port=parsed.port
 )
 
 cursor = db.cursor()
 
-# 🔹 AUTO CREATE USERS TABLE (RUNS ONLY IF NOT EXISTS)
+# create table if not present
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -53,39 +53,34 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )
 """)
-
 db.commit()
+
 
 @app.route("/")
 def home():
     return redirect("/register")
 
 
+# ---------- REGISTER ----------
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        nationality = request.form["nationality"]
-        initial = request.form["initial"]
-        full_name = request.form["name"]
-        gender = request.form["gender"]
-        dob = request.form["dob"]
-        mobile = request.form["mobile"]
-        email = request.form["email"]
-        password = generate_password_hash(request.form["password"])
+        nationality = request.form.get("nationality")
+        initial = request.form.get("initial")
+        full_name = request.form.get("name")
+        gender = request.form.get("gender")
+        dob = request.form.get("dob")
+        mobile = request.form.get("mobile")
+        email = request.form.get("email")
+        password = generate_password_hash(request.form.get("password"))
 
         cursor.execute("""
             INSERT INTO users
             (nationality, initial, full_name, gender, date_of_birth, mobile, email, password)
             VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
         """, (
-            nationality,
-            initial,
-            full_name,
-            gender,
-            dob,
-            mobile,
-            email,
-            password
+            nationality, initial, full_name,
+            gender, dob, mobile, email, password
         ))
 
         db.commit()
@@ -93,13 +88,13 @@ def register():
 
     return render_template("register.html")
 
-from werkzeug.security import check_password_hash
 
+# ---------- LOGIN ----------
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        email = request.form["email"]
-        password = request.form["password"]
+        email = request.form.get("email")
+        password = request.form.get("password")
 
         cursor.execute(
             "SELECT id, full_name, password FROM users WHERE email=%s",
@@ -112,11 +107,12 @@ def login():
             session["user_name"] = user[1]
             return redirect("/dashboard")
 
-        else:
-            return "Invalid email or password"
+        return "Invalid email or password"
 
     return render_template("login.html")
 
+
+# ---------- DASHBOARD ----------
 @app.route("/dashboard")
 def dashboard():
     if "user_id" not in session:
@@ -142,59 +138,56 @@ def dashboard():
 
     return render_template("dashboard.html", user=user_data)
 
+
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect("/login")
 
+
+# ---------- WELLNESS ----------
 @app.route("/wellness")
 def wellness():
     if "user_id" not in session:
         return redirect("/login")
 
     tips = [
-        "Drink at least 8 glasses of water today to stay hydrated.",
-        "Take a 10-minute walk to refresh your mind and body.",
-        "Practice deep breathing for 5 minutes to reduce stress.",
-        "Limit screen time before bed for better sleep quality.",
-        "Eat at least one fruit or vegetable today.",
-        "Maintain good posture while sitting or working.",
-        "Take short breaks during work to avoid fatigue.",
-        "Get at least 7–8 hours of sleep for optimal health.",
-        "Spend a few minutes in sunlight for vitamin D.",
-        "Talk to someone you trust if you feel overwhelmed."
+        "Drink enough water today.",
+        "Take a short walk to clear your head.",
+        "Try slow breathing for a few minutes.",
+        "Avoid phone usage before sleep.",
+        "Eat something healthy today.",
+        "Sit straight while working.",
+        "Take breaks between tasks.",
+        "Sleep for at least 7 hours.",
+        "Spend some time in sunlight.",
+        "Talk to someone you trust."
     ]
 
-    import random
-    daily_tip = random.choice(tips)
+    return render_template("wellness.html", tip=random.choice(tips))
 
-    return render_template("wellness.html", tip=daily_tip)
 
 @app.route("/yoga")
 def yoga():
-    if not session.get("user_id"):
+    if "user_id" not in session:
         return redirect("/login")
 
     return render_template("yoga.html")
 
-def get_chatbot_reply(user_message):
+
+# ---------- CHATBOT ----------
+def get_chatbot_reply(message):
     try:
         response = client.chat.completions.create(
             model="llama-3.1-8b-instant",
             messages=[
                 {
                     "role": "system",
-                    "content": (
-                        "You are a calm, supportive wellness assistant. "
-                        "You help users with stress, anxiety, loneliness, and motivation. "
-                        "You must NOT give medical diagnosis or prescribe treatments. "
-                        "Keep answers short, kind, and supportive."
-                    )
+                    "content": "You are a friendly wellness assistant. "
+                               "Be supportive and calm. "
+                               "Do not give medical advice."
                 },
-                {
-                    "role": "user",
-                    "content": user_message
-                }
+                {"role": "user", "content": message}
             ],
             temperature=0.6,
             max_tokens=200
@@ -203,23 +196,23 @@ def get_chatbot_reply(user_message):
         return response.choices[0].message.content
 
     except Exception as e:
-        print("❌ CHATBOT ERROR:", e)
-        return "I'm here with you. Please try again in a moment."
-    
+        print(e)
+        return "Something went wrong. Please try again."
+
+
 @app.route("/chat", methods=["POST"])
 def chat():
     if "user_id" not in session:
         return jsonify({"reply": "Please login first."})
 
     data = request.get_json()
-    user_message = data.get("message", "")
+    msg = data.get("message", "")
 
-    if not user_message.strip():
-        return jsonify({"reply": "Please tell me what's on your mind."})
+    if not msg.strip():
+        return jsonify({"reply": "Say something first."})
 
-    reply = get_chatbot_reply(user_message)
+    return jsonify({"reply": get_chatbot_reply(msg)})
 
-    return jsonify({"reply": reply})
 
 @app.route("/chatbot")
 def chatbot():
@@ -227,7 +220,6 @@ def chatbot():
         return redirect("/login")
 
     return render_template("chatbot.html")
-
 
 
 if __name__ == "__main__":
